@@ -1,9 +1,13 @@
 package info.wind4869.applogger;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,9 +15,13 @@ import android.view.View;
 import android.widget.Button;
 import android.app.AlertDialog.Builder;
 
+import java.security.Permission;
+
 import info.wind4869.applogger.Service.LogService;
 
-public class MainActivity extends ActionBarActivity {
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +46,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        startButton = (Button) findViewById(R.id.startButton);
+        startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,6 +59,31 @@ public class MainActivity extends ActionBarActivity {
                 builder.create().show();
             }
         });
+
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        AlertDialog.Builder b = new Builder(this);
+        b.setTitle("需要开启查看应用使用情况的权限");
+        b.setMessage("去开权限");
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        int usageStatsPermission = getPackageManager().checkPermission("android.permission.PACKAGE_USAGE_STATS", getPackageName());
+        if (usageStatsPermission != PERMISSION_GRANTED) {
+            Log.d("AppLogger", "PACKAGE_USAGE_STATS permission loss, " + usageStatsPermission);
+            b.create().show();
+        }
+
     }
 
     @Override
